@@ -1,0 +1,2 @@
+# SmartShuffle
+An improved shuffling algorithm for Spotify playlists. The intention is that another factor will be taken into consideration when shuffling songs, in addition to artist name: transition from genre to genre on the playlist. The application is currently in it's earliest stages, however, the intention is to ultimately find a way to map integers to genre types and sort according to these integer values.
