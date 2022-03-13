@@ -5,7 +5,7 @@ import random
 
 ######################################################################################################
 
-artists = [['A', 'AA', 'AAA'], ['B'], ['C', 'CC'], ['D'], ['E', 'EE', 'EEE', 'EEEE']]
+artists = [[['A', 1], ['AA',2], ['AAA',1]], [['B',4]], [['C', 2], ['CC',3]], [['D',5]], [['E',4], ['EE',3], ['EEE',4], ['EEEE',3]]]
 
 # first, shuffle items in each group
 # use fisher-yates
@@ -24,19 +24,23 @@ def randomize (arr):
 
 # MAIN ALGORITHM
 # Initialize positional value dictionary v
+# In this array, map: Artist name -> [random offset, genre type]
+# When shuffling the artists, we NEED to preserve the genre.
 v = {}
 for sublist in artists:
     n = len(sublist)
     for i in range(n):
-        v[sublist[i]] = i/n
+        v[sublist[i][0]] = []
+        v[sublist[i][0]].append(i/n)           # append random offset variable
+        v[sublist[i][0]].append(sublist[i][1]) # append the genre type
 
     # Generate initial random offset (io) and add to each value in v
     io = random.uniform(0, (1/n))
     for i in range(n):
-        v[sublist[i]] += io
+        v[sublist[i][0]][0] += io
         # Generate another random offset and add to each value
         randoffset = random.uniform((-1/10)*n, (1/10)*n)
-        v[sublist[i]] += randoffset
+        v[sublist[i][0]][0] += randoffset
     
 # sort all items by positional values
 # https://stackabuse.com/how-to-sort-dictionary-by-value-in-python/
@@ -50,4 +54,3 @@ for key in sorted_keys:
 for key in sorted_dict.keys():
     print(key)
 
-    
