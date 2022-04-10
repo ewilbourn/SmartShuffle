@@ -60,11 +60,6 @@ for key in sorted_dict.keys():
 
 # Apply the Smart Shuffle Algorithm to the playlist that was previously shuffled by artist name.
 
-"""
-Maybe instead, make a list of lists with [artist, genre] instead of 
-working with a dictionary?
-"""
-
 genres = []
 # Create a list of all integers representing genre so we can find the highest integer.
 for artist in artists:
@@ -72,7 +67,10 @@ for artist in artists:
         genres.append(song[1])
 
 highestLevel = max(genres)
-diff = highestLevel//2
+
+#maxGenreDifference defines the threshold of when we decide to smart shuffle
+#this is the maximum difference between genres of two neighboring songs.
+maxGenreDifference = highestLevel//2
 
 # Create a list of lists with [artist, genre]
 newList = []
@@ -82,56 +80,67 @@ for key in sorted_keys:
     sublist.append(sorted_dict[key][1])
     newList.append(sublist)
 
-print(newList)
+"""
+Smart Shuffle:
 
+While length of list of [artist,genre] is greater than 0:
+    Find the current song in the
+
+
+"""
 while len(newList) > 0:
-    currentSong = newList[0][1]
-    if 2 != len(newList):
-        nextSong = newList[1][1]
+    currentSongGenre = newList[0][1]
+    if len(newList) > 1:
+        nextSongGenre = newList[1][1]
     else:
         print(newList[0])
         newList.pop(0)
         break
 
     #check difference in genres in current and next song
-    newdiff = abs(nextSong-currentSong)
-    if newdiff <= diff:
+    genreDifference = abs(nextSongGenre-currentSongGenre)
+
+    #If the current difference between genres isn't larger than the maximum
+    #difference in genres, then pop off the current song from the list and
+    #go back to the top of the loop.
+    if genreDifference <= maxGenreDifference:
         #pop off the current song from front of list
         print(newList[0])
         newList.pop(0)
         continue
 
-    #this is where the smart shuffle algorithm happens
+    #SMART SHUFFLE BEGINS
     else:
-        #create temp so we can search through 
+        #create temp so we can search through the rest of the list of songs
+        #pop off the first two songs because we don't want the "currentSong" or "nextSong" to be included in this
         temp = copy.deepcopy(newList)
         temp.pop(0)
         temp.pop(0)
 
         #set the random range parameters 
-        lowerIndex = (currentSong-diff) if (currentSong-diff) >= 0  else 1
-        upperIndex = (currentSong+diff) if (currentSong+diff) <= highestLevel else highestLevel
+        lowerIndex = (currentSongGenre-maxGenreDifference) if (currentSongGenre-maxGenreDifference) >= 0  else 1
+        upperIndex = (currentSongGenre+maxGenreDifference) if (currentSongGenre+maxGenreDifference) <= highestLevel else highestLevel
 
         #generate random level - gets the level of a song to grab
-        newNextSong = random.randint(lowerIndex, upperIndex)
+        newNextSongGenre = random.randint(lowerIndex, upperIndex)
 
-        #find a song of this level in the list
+        #find a song of this random level in the list
         index = -1
         for i, sublist in enumerate(temp):
-            if sublist[1] == newNextSong:
+            if sublist[1] == newNextSongGenre:
                 index = i
         
+        #if there was no song of "newNextSongGenre", then continue randomly generating a genre number 
         while index == -1:
-            newNextSong = random.randint(lowerIndex, upperIndex)
+            newNextSongGenre = random.randint(lowerIndex, upperIndex)
             for i, sublist in enumerate(temp):
-                if sublist[1] == newNextSong:
+                if sublist[1] == newNextSongGenre:
                     index = i
 
         newList.insert(1, newList[index+2])
         newList.pop(index+3)
         print(newList[0])
         newList.pop(0)
-print(newList[0])
-newList.pop(0)
+
 
 
