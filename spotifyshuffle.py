@@ -6,7 +6,7 @@ import copy
 
 ######################################################################################################
 
-artists = [[['A', 1], ['AA',2], ['AAA',1]], [['B',4]], [['C', 2], ['CC',3]], [['D',5]], [['E',4], ['EE',3], ['EEE',4], ['EEEE',3]]]
+artists = [[['A', 5], ['AA',2], ['AAA',7]], [['B',9], ['B', 6]], [['C', 3], ['CC',7], ['CC',1]], [['D',5]], [['E',2], ['EE',7], ['EEE',1], ['EEEE',2]]]
 
 # first, shuffle items in each group
 # use fisher-yates
@@ -14,7 +14,7 @@ artists = [[['A', 1], ['AA',2], ['AAA',1]], [['B',4]], [['C', 2], ['CC',3]], [['
 def randomize (arr):
     n = len(arr)
     # Start from the last element and swap one by one. We don't
-    # need to run for the first element that's why i > 0
+
     for i in range(n-1,0,-1):
         # Pick a random index from 0 to i
         j = random.uniform(0,i+1)
@@ -29,20 +29,23 @@ def randomize (arr):
 # In this array, map: Artist name -> [random offset, genre type]
 # When shuffling the artists, we NEED to preserve the genre.
 v = {}
-for sublist in artists:
-    n = len(sublist)
-    for i in range(n):
-        v[sublist[i][0]] = []
-        v[sublist[i][0]].append(i/n)           # append random offset variable
-        v[sublist[i][0]].append(sublist[i][1]) # append the genre type
+for artist in artists:
+    numSongs = len(artist)
 
-    # Generate initial random offset (io) and add to each value in v
-    io = random.uniform(0, (1/n))
-    for i in range(n):
-        v[sublist[i][0]][0] += io
+    #iterate through all songs and initialize our dictionary entries
+    #add the random offset variable to be the first in the list of values for a key value; then append the genre type
+    for i in range(numSongs):
+        v[artist[i][0]] = []
+        v[artist[i][0]].append(i/numSongs)           # append random offset variable
+        v[artist[i][0]].append(artist[i][1]) # append the genre type
+
+    # Generate initial random offset (io) and add to each song for a specific artist in v
+    io = random.uniform(0, (1/numSongs))
+    for i in range(numSongs):
+        v[artist[i][0]][0] += io
         # Generate another random offset and add to each value
-        randoffset = random.uniform((-1/10)*n, (1/10)*n)
-        v[sublist[i][0]][0] += randoffset
+        randoffset = random.uniform((-1/10)*numSongs, (1/10)*numSongs)
+        v[artist[i][0]][0] += randoffset
     
 # sort all items by positional values
 # https://stackabuse.com/how-to-sort-dictionary-by-value-in-python/
@@ -53,8 +56,9 @@ sorted_keys = sorted(v, key=v.get)
 for key in sorted_keys:
     sorted_dict[key] = v[key]
 
+print("\nPlaylist Order - Spotify Shuffle")
 for key in sorted_dict.keys():
-    print(key)
+    print("['{}', {}]".format(key, sorted_dict[key][1]))
 
 ###########################################################################################3
 
@@ -67,35 +71,49 @@ for artist in artists:
         genres.append(song[1])
 
 highestLevel = max(genres)
-
+lowestLevel = min(genres)
 #maxGenreDifference defines the threshold of when we decide to smart shuffle
 #this is the maximum difference between genres of two neighboring songs.
-maxGenreDifference = highestLevel//2
+maxGenreDifference = (highestLevel-lowestLevel)//2
 
 # Create a list of lists with [artist, genre]
 newList = []
 for key in sorted_keys:
-    sublist = []
-    sublist.append(key)
-    sublist.append(sorted_dict[key][1])
-    newList.append(sublist)
+    songs = []
+    songs.append(key)
+    songs.append(sorted_dict[key][1])
+    newList.append(songs)
 
 """
-Smart Shuffle:
+LOGIC OF THE WHILE LOOP BELOW:
 
 While length of list of [artist,genre] is greater than 0:
-    Find the current song in the
+    Find the current front of the list of [artist,genre] lists
+    If the len(list) > 1, then get the second element in the list of [artist,genre].
+
+    We need the first and second elements in this list so that we can compare the difference between genre types.
+
+    Determine the difference between genre types. If the difference between these values is smallest than the
+    maximum allowed difference between genres, pop the first song from the front of the list and continue.
+
+    If not, implement the smart shuffle.
+
+    Smart shuffle:
+    -create a copy of the list of [artist, genre] elements and remove the front two values (current song, next song)
+    -set the random range parameters for the lower index and upper index.
+        -lower: current genre integer value - maximum genre integer value; if this is less than 0, set to 1
+        -upper: current genre integer value + maximum genre integer value; if this is greater than the highest genre level
+        stored in the list, set this value to the highest genre level
+    -randomly generate a genre integer value in between lower and upper
+    -find a song in the copy of the list of [artist, genre] that has the randomly generated genre value. If a song
+    cannot be found, then randomly generate a new genre integer value until a song in the appropriate threshold can be found.
 
 
 """
-while len(newList) > 0:
+print("\nPlaylist Order - Spotify Shuffle and then Smart Shuffle\nCloseness threshold: current and next song danceability integers within {} of each other".format(maxGenreDifference))
+while len(newList) > 3:
     currentSongGenre = newList[0][1]
-    if len(newList) > 1:
-        nextSongGenre = newList[1][1]
-    else:
-        print(newList[0])
-        newList.pop(0)
-        break
+    nextSongGenre = newList[1][1]
 
     #check difference in genres in current and next song
     genreDifference = abs(nextSongGenre-currentSongGenre)
@@ -116,31 +134,31 @@ while len(newList) > 0:
         temp = copy.deepcopy(newList)
         temp.pop(0)
         temp.pop(0)
-
+        if len(temp) == 0:
+                continue
         #set the random range parameters 
-        lowerIndex = (currentSongGenre-maxGenreDifference) if (currentSongGenre-maxGenreDifference) >= 0  else 1
+        lowerIndex = (currentSongGenre-maxGenreDifference) if (currentSongGenre-maxGenreDifference) >= lowestLevel  else lowestLevel
         upperIndex = (currentSongGenre+maxGenreDifference) if (currentSongGenre+maxGenreDifference) <= highestLevel else highestLevel
 
         #generate random level - gets the level of a song to grab
-        newNextSongGenre = random.randint(lowerIndex, upperIndex)
-
-        #find a song of this random level in the list
-        index = -1
-        for i, sublist in enumerate(temp):
-            if sublist[1] == newNextSongGenre:
-                index = i
-        
-        #if there was no song of "newNextSongGenre", then continue randomly generating a genre number 
-        while index == -1:
-            newNextSongGenre = random.randint(lowerIndex, upperIndex)
-            for i, sublist in enumerate(temp):
-                if sublist[1] == newNextSongGenre:
-                    index = i
+        valuesInRange = list(temp.index(x) for x in temp if lowerIndex <= x[1] <= upperIndex)
+        #all(ele >= lowerIndex and ele <= upperIndex for ele in temp)
+        if len(valuesInRange) > 0:
+            index = random.randint(0, len(valuesInRange))
+        else:
+            index = random.randint(0, len(temp))
 
         newList.insert(1, newList[index+2])
         newList.pop(index+3)
         print(newList[0])
         newList.pop(0)
+
+print(newList[0])
+newList.pop(0)
+print(newList[0])
+newList.pop(0)
+print(newList[0], "\n")
+newList.pop(0)
 
 
 
