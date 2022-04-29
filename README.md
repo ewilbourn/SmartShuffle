@@ -7,3 +7,5 @@ An improved shuffling algorithm for Spotify playlists. The intention is that ano
 a. Install anaconda. Create a new Conda environment via the "Environments" navigator. I installed Python 3.10.4 to my environment.
 b. Open up the terminal view of your Conda environment by clicking the green triangle. Once here, type the following commands one at a time: "conda activate 'your_environment_name'", "pip install spotipy", "pip install pandas"
 c. Open up the codebase in VSCode and select your newly created Conda environment for your Python interpreter.
+d. Lastly, you'll need a client id, client secret id, and playlist id. To obtain a client id and client secret id, create an account here: https://developer.spotify.com/dashboard/login and then create an application by clicking "Create an App" to obtain these keys. 
+e. In regards to a playlist id, I have two different ids that I have commented out in my code that you can connect to. Just don't input the quotation marks on the command line. To connect to your own playlist, follow these instructions: https://clients.caster.fm/knowledgebase/110/How-to-find-Spotify-playlist-ID.html
