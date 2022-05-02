@@ -8,6 +8,11 @@ import copy
 
 artists = [[['A', 5], ['AA',2], ['AAA',7]], [['B',9], ['B', 6]], [['C', 3], ['CC',7], ['CC',1]], [['D',5]], [['E',2], ['EE',7], ['EEE',1], ['EEEE',2]]]
 
+print("\n\nPlaylist Order - Before Shuffle")
+for artist in artists:
+        for song in artist:
+            print("['{}', {}]".format(song[0], song[1]))
+
 # first, shuffle items in each group
 # use fisher-yates
 # https://www.geeksforgeeks.org/shuffle-a-given-array-using-fisher-yates-shuffle-algorithm/ 
