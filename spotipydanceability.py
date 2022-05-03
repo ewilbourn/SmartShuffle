@@ -2,6 +2,7 @@ from hashlib import new
 from math import floor
 import random
 from numpy import format_float_scientific
+#from IPython.display import display
 import numpy as np
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -55,7 +56,7 @@ def spotify_shuffle(df, artistList):
             newIndices[current_trackID] += randoffset
         
     # create new dataframe for values in the order of their new indices
-    column_names = ["danceability", "artist", "album", "track_name", "track_id"]
+    column_names = ["danceability", "artist", "track_name", "album", "track_id"]
     newDf = pd.DataFrame(columns=column_names)
     for key in newIndices.keys():
         newIndex = newIndices[key]
@@ -85,7 +86,7 @@ def getRowInfo(row):
 
     t_i = str(row['track_id']).split()
     track_id = t_i[1] if len(t_i) > 1 else t_i[0]
-    return(danceability, artist, album, track_name, track_id)
+    return(danceability, artist, track_name, album, track_id)
 
 # Apply the Smart Shuffle Algorithm to the playlist that was previously shuffled by fisher-yates.
 def smartShuffle(df, danceabilityList):
@@ -179,7 +180,7 @@ def smartShuffle(df, danceabilityList):
             rowValues = getRowInfo(newRow)
         
             #get the index of the record we identified in the df so we can remove it from its current index there
-            indices = df.index[(df['danceability']== rowValues[0]) & (df['artist']==rowValues[1]) & (df['album']==rowValues[2]) & (df['track_name']==rowValues[3]) & (df['track_id']==rowValues[4])].tolist()
+            indices = df.index[(df['danceability']== rowValues[0]) & (df['artist']==rowValues[1]) & (df['track_name']==rowValues[2]) & (df['album']==rowValues[3]) & (df['track_id']==rowValues[4])].tolist()
             removeIndex = indices[0]
 
             #remove the record from current position in df; index+2 because index came from temp and size of temp is 2 smaller than df
@@ -198,7 +199,7 @@ def smartShuffle(df, danceabilityList):
             df = df.drop(index=0)
             df = df.reset_index(drop=True) 
 
-    newDf = pd.DataFrame(data, columns=["danceability", "artist", "album", "track_name", "track_id"])
+    newDf = pd.DataFrame(data, columns=["danceability", "artist", "track_name", "album", "track_id"])
     return (newDf, maxGenreDifference)
 
 #code from  https://stackoverflow.com/questions/39086287/spotipy-how-to-read-more-than-100-tracks-from-a-playlist
@@ -225,8 +226,8 @@ def call_playlist(creator, playlist_id):
         playlist_features = {}
         # Get metadata
         playlist_features["artist"] = track["track"]["album"]["artists"][0]["name"]
-        playlist_features["album"] = track["track"]["album"]["name"]
         playlist_features["track_name"] = track["track"]["name"]
+        playlist_features["album"] = track["track"]["album"]["name"]
         playlist_features["track_id"] = track["track"]["id"]
         
         # Get audio features
@@ -266,6 +267,7 @@ print("\nPlaylist After Applying Fisher-Yates: \n", df)
 #second shuffle
 spotifyShdf = spotify_shuffle(df, songs[2])
 print("\nPlaylist After Applying Spotify Shuffle: \n", spotifyShdf)
+
 
 #third shuffle
 smartShDf = smartShuffle(spotifyShdf, songs[1])
